@@ -1,10 +1,12 @@
 import "./App.css";
 import TableView from "./components/viewDataTablePage/tableView";
+import Dashboard from "./components/mainDashboard/dashboard";
 
 function App() {
   return (
     <section>
-      <TableView></TableView>
+      <Dashboard></Dashboard>
+      {/* <TableView></TableView> */}
     </section>
   );
 }

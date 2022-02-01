@@ -1,6 +1,7 @@
 import PropTypes from "prop-types";
 import "./mainTable.css";
 import HeaderItem from "./headerItem";
+import CellData from "./cellData";
 
 const MainTable = ({ sample_data }) => {
   // headers is a variable which will store the results of the map function, a list of headerItem components
@@ -9,7 +10,22 @@ const MainTable = ({ sample_data }) => {
   const headers = Object.keys(sample_data.daily_list[0]).map((key, index) => {
     return <HeaderItem key={index} headerName={key} index={index}></HeaderItem>;
   });
-
+  const rowsOfCells = sample_data.daily_list.map((dateDict, index) => {
+    return (
+      <tr>
+        {Object.keys(dateDict).map((dateKey, index) => {
+          return (
+            <CellData
+              key={index}
+              index={index}
+              cellData={dateDict[dateKey]}
+              dateKey={dateKey}
+            ></CellData>
+          );
+        })}
+      </tr>
+    );
+  });
   return (
     <section className="container-md">
       <div className="table-responsive">
@@ -17,13 +33,7 @@ const MainTable = ({ sample_data }) => {
           <thead>
             <tr>{headers}</tr>
           </thead>
-          <tbody>
-            <tr>
-              <td>Day 1</td>
-              <td>Food</td>
-              <td>3</td>
-            </tr>
-          </tbody>
+          <tbody>{rowsOfCells}</tbody>
         </table>
       </div>
     </section>
