@@ -8,8 +8,8 @@ const MealsContainer = ({ value, changeDailyData, index }) => {
   return (
     <section className="mb-5">
       <select
-        name="food"
-        value={value}
+        name="food" // "food" is the key for this piece of state
+        value={value} // value is the starting state
         onChange={(event) => changeDailyData(event, index)}
       >
         <option>SelectMeal</option>

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import "./dashboard.css";
 import InputData from "../inputDataPage/inputData";
+import QueryDataModal from "../queryDataPage/queryDataModal";
 
 const Dashboard = ({}) => {
   // blankData is the initital state for dailyData and changeDailyData
@@ -26,6 +27,15 @@ const Dashboard = ({}) => {
     energy: "",
     seasonal: "",
   };
+  // setting the intial state for queryOptions, as a dict
+  const blankQueryOptions = {
+    symptom: "IBS",
+    severity: "1",
+    food: false,
+    water: false,
+    alcohol: false,
+    sleep: false,
+  };
 
   // setting state for Dashboard details, for each useState: first item in [] is the variable
   // being created and the second item is the function to change it
@@ -39,9 +49,40 @@ const Dashboard = ({}) => {
   const [dailyData, changeDailyData] = useState(blankData);
   // updateDailyData is a helper function for changeDailyData
   const updateDailyData = (event, index) => {
+    // create deep copy of dailyData
+    var tempData = { ...dailyData };
+
+    if (event.target.name === "food") {
+      tempData[event.target.name][index] = event.target.value;
+    } else {
+      tempData[event.target.name] = event.target.value;
+    }
+    //calling function changeDailyData, passing tempData, which now
+    // has the user's selections
+    changeDailyData(tempData);
     console.log(event.target.value);
     console.log(event.target.name);
     console.log(index);
+  };
+  const [queryOptions, changeQueryOptions] = useState(blankQueryOptions);
+  // updateQueryOptions is a helper function for changeQueryOptions, that
+  // will change the state of queryOptions based on what updateQueryOptions
+  // registers the user choosing
+  const updateQueryOptions = (event) => {
+    // create deep copy of queryOptions
+    var tempData = { ...queryOptions };
+    if (
+      (event.target.name === "symptom") |
+      (event.target.name === "severity")
+    ) {
+      tempData[event.target.name] = event.target.value;
+    } else {
+      tempData[event.target.name] = event.target.checked;
+    }
+    changeQueryOptions(tempData);
+    console.log(event.target.name);
+    console.log(event.target.value);
+    console.log(event.target.checked);
   };
   return (
     <section>
@@ -55,11 +96,18 @@ const Dashboard = ({}) => {
         changeDate={changeDate}
         changeDailyData={updateDailyData}
       ></InputData>
+      <QueryDataModal
+        queryIsDisplayed={queryIsDisplayed}
+        changeQueryDisplay={changeQueryDisplay}
+        queryOptions={queryOptions}
+        changeQueryOptions={updateQueryOptions}
+      ></QueryDataModal>
       {/* onClick is the action being listened for, changeInputDisplay is the 
       function I want performed when the click is registered */}
       {/* changeInputDisplay has to be wrapped in () and
           anonymous function or it will get called every time the page renders*/}
       <button onClick={() => changeInputDisplay(true)}>Input Data</button>
+      <button onClick={() => changeQueryDisplay(true)}>Query Data</button>
     </section>
   );
 };
