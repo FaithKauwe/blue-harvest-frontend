@@ -1,10 +1,6 @@
 import "./mealsContainer.css";
-const userFood = {
-  oatmeal: "ingredients, ...",
-  steak: "ingredients ...",
-  "tuna sandwich": "ingredients",
-};
-const MealsContainer = ({ value, changeDailyData, index }) => {
+
+const MealsContainer = ({ value, changeDailyData, index, userFood }) => {
   return (
     <section className="mb-5">
       <select

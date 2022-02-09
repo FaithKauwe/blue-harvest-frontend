@@ -6,7 +6,9 @@ const QueryDataModal = ({
   changeQueryDisplay,
   queryOptions,
   changeQueryOptions,
+  queryDataToBE,
 }) => {
+  Modal.setAppElement("#root");
   return (
     <section>
       <Modal isOpen={queryIsDisplayed} className="modal-dialog">
@@ -80,8 +82,8 @@ const QueryDataModal = ({
             <label htmlFor="sleep">Sleep</label>
           </div>
           <div className="modal-footer">
-            <button>Cancel</button>
-            <button>Submit</button>
+            <button onClick={() => changeQueryDisplay(false)}>Cancel</button>
+            <button onClick={queryDataToBE}>Submit</button>
           </div>
         </div>
       </Modal>

@@ -1,9 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./dashboard.css";
 import InputData from "../inputDataPage/inputData";
 import QueryDataModal from "../queryDataPage/queryDataModal";
+import axios from "axios";
 
 const Dashboard = ({}) => {
+  // const userFood = {
+  //   oatmeal: "ingredients, ...",
+  //   steak: "ingredients ...",
+  //   "tuna sandwich": "ingredients",
+  // };
   // blankData is the initital state for dailyData and changeDailyData
   const blankData = {
     food: [
@@ -36,7 +42,8 @@ const Dashboard = ({}) => {
     alcohol: false,
     sleep: false,
   };
-
+  const currentDate = new Date();
+  currentDate.setHours(0, 0, 0, 0);
   // setting state for Dashboard details, for each useState: first item in [] is the variable
   // being created and the second item is the function to change it
   // this state is for inputData Modal
@@ -44,9 +51,52 @@ const Dashboard = ({}) => {
   // this state is for queryData Modal // false is the state this starts with, when changed to true, the modal will populate
   const [queryIsDisplayed, changeQueryDisplay] = useState(false);
   // this state is for changing the date through mainDashboard, new Date gets today's date as a date object
-  const [activeDate, changeDate] = useState(new Date());
+  const [activeDate, changeDate] = useState(currentDate);
   // this state holds all 18 data entries for inputData, starts as an empty dict
   const [dailyData, changeDailyData] = useState(blankData);
+  const [userFood, populateUserFood] = useState();
+
+  const [inputDate, userChangeDate] = useState(
+    activeDate.toISOString().split("T")[0]
+  );
+  // submitDate is the function which gets called when user clicks submit after input a new date
+  const submitDate = (event) => {
+    event.preventDefault();
+    // inputDate will be a string in ISO format
+    changeDate(
+      new Date(
+        inputDate.slice(0, 4),
+        inputDate.slice(5, 7) - 1,
+        inputDate.slice(8, 10)
+      )
+    );
+  };
+  const inputChange = (event) => {
+    userChangeDate(event.target.value);
+  };
+
+  useEffect(() => {
+    axios // the axios request uses a split function to truncuate the datetime object to this format YYYY-MM-DD
+      // this axios request is tied to the BE endpoint which returns data that has already been entered for a day (NOT based on query options)
+      .get(
+        `http://127.0.0.1:5000/daily_tracker/${
+          activeDate.toISOString().split("T")[0]
+        }`
+      )
+      .then((result) => {
+        changeDailyData(result.data);
+      });
+  }, [activeDate]); // each time activeDate is changed, it will call useEffect and this function is now tied to only activeDate
+  useEffect(() => {
+    getUserFood();
+  }, []);
+  // getUserFood is a helper function for populateUserFood which uses an axios call to access
+  // the CommonFood Table in the BE
+  const getUserFood = () => {
+    axios.get(`http://127.0.0.1:5000/common_food`).then((result) => {
+      populateUserFood(result.data);
+    });
+  };
   // updateDailyData is a helper function for changeDailyData
   const updateDailyData = (event, index) => {
     // create deep copy of dailyData
@@ -84,6 +134,34 @@ const Dashboard = ({}) => {
     console.log(event.target.value);
     console.log(event.target.checked);
   };
+  // queryDataToBE is helper function that sends the queryOptions(selected by user)
+  // to the back end and closes the modal
+  const queryDataToBE = () => {
+    axios
+      .get(`http://127.0.0.1:5000/daily_tracker`, {
+        params: {
+          symptom: queryOptions.symptom,
+          severity: queryOptions.severity,
+          food: queryOptions.food,
+          water: queryOptions.water,
+          alcohol: queryOptions.alcohol,
+          sleep: queryOptions.sleep,
+        },
+      })
+      .then((result) => {
+        console.log(result.data);
+      });
+    changeQueryDisplay(false);
+  };
+  // dailyDataToBE is a helper function that sends the dailyData(updated by user)
+  // to the back end and closes the modal
+  const dailyDataToBE = () => {
+    console.log(dailyData);
+    changeInputDisplay(false);
+  };
+  // queryDataToBE is helper function that sends the queryOptions(updated by user)
+  // to the back end and closes the modal
+
   return (
     <section>
       <InputData
@@ -95,12 +173,15 @@ const Dashboard = ({}) => {
         changeInputDisplay={changeInputDisplay}
         changeDate={changeDate}
         changeDailyData={updateDailyData}
+        dailyDataToBE={dailyDataToBE}
+        userFood={userFood}
       ></InputData>
       <QueryDataModal
         queryIsDisplayed={queryIsDisplayed}
         changeQueryDisplay={changeQueryDisplay}
         queryOptions={queryOptions}
         changeQueryOptions={updateQueryOptions}
+        queryDataToBE={queryDataToBE}
       ></QueryDataModal>
       {/* onClick is the action being listened for, changeInputDisplay is the 
       function I want performed when the click is registered */}
@@ -108,6 +189,11 @@ const Dashboard = ({}) => {
           anonymous function or it will get called every time the page renders*/}
       <button onClick={() => changeInputDisplay(true)}>Input Data</button>
       <button onClick={() => changeQueryDisplay(true)}>Query Data</button>
+      <form onSubmit={submitDate}>
+        <label>Change Date</label>
+        <input value={inputDate} onChange={inputChange}></input>
+        <button type="submit">Submit</button>
+      </form>
     </section>
   );
 };
