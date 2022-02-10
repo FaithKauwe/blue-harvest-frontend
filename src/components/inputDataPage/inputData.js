@@ -16,15 +16,27 @@ const InputData = ({
   changeDailyData,
   dailyDataToBE,
   userFood,
+  newMealName,
+  changeNewMealName,
+  newMealIngredients,
+  changeNewMealIngredients,
+  newMealToBE,
+  newMealDisplay,
+  changeNewMealDisplay,
 }) => {
   Modal.setAppElement("#root");
-  const [newMealDisplay, changeNewMealDisplay] = useState(false);
+
   return (
     <section>
       <Modal isOpen={inputIsDisplayed} className="modal-dialog">
         <NewMealModal
           newMealDisplay={newMealDisplay}
           changeNewMealDisplay={changeNewMealDisplay}
+          newMealName={newMealName}
+          newMealIngredients={newMealIngredients}
+          changeNewMealName={changeNewMealName}
+          changeNewMealIngredients={changeNewMealIngredients}
+          newMealToBE={newMealToBE}
         ></NewMealModal>
         <div className="modal-content">
           <div className="modal-header">

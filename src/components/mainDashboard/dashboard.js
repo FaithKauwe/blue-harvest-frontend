@@ -1,15 +1,11 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./dashboard.css";
 import InputData from "../inputDataPage/inputData";
 import QueryDataModal from "../queryDataPage/queryDataModal";
 import axios from "axios";
 
-const Dashboard = ({}) => {
-  // const userFood = {
-  //   oatmeal: "ingredients, ...",
-  //   steak: "ingredients ...",
-  //   "tuna sandwich": "ingredients",
-  // };
+const Dashboard = ({ tableData, setTableData }) => {
   // blankData is the initital state for dailyData and changeDailyData
   const blankData = {
     food: [
@@ -42,6 +38,7 @@ const Dashboard = ({}) => {
     alcohol: false,
     sleep: false,
   };
+  let navigate = useNavigate();
   const currentDate = new Date();
   currentDate.setHours(0, 0, 0, 0);
   // setting state for Dashboard details, for each useState: first item in [] is the variable
@@ -59,6 +56,11 @@ const Dashboard = ({}) => {
   const [inputDate, userChangeDate] = useState(
     activeDate.toISOString().split("T")[0]
   );
+  // these two states track the input boxes in newMealModal as a user enters new meal name and ingredients
+  const [newMealName, updateNewMealName] = useState("");
+  const [newMealIngredients, updateNewMealIngredients] = useState("");
+  const [newMealDisplay, changeNewMealDisplay] = useState(false);
+
   // submitDate is the function which gets called when user clicks submit after input a new date
   const submitDate = (event) => {
     event.preventDefault();
@@ -110,9 +112,6 @@ const Dashboard = ({}) => {
     //calling function changeDailyData, passing tempData, which now
     // has the user's selections
     changeDailyData(tempData);
-    console.log(event.target.value);
-    console.log(event.target.name);
-    console.log(index);
   };
   const [queryOptions, changeQueryOptions] = useState(blankQueryOptions);
   // updateQueryOptions is a helper function for changeQueryOptions, that
@@ -130,12 +129,10 @@ const Dashboard = ({}) => {
       tempData[event.target.name] = event.target.checked;
     }
     changeQueryOptions(tempData);
-    console.log(event.target.name);
-    console.log(event.target.value);
-    console.log(event.target.checked);
   };
   // queryDataToBE is helper function that sends the queryOptions(selected by user)
   // to the back end and closes the modal
+
   const queryDataToBE = () => {
     axios
       .get(`http://127.0.0.1:5000/daily_tracker`, {
@@ -149,19 +146,64 @@ const Dashboard = ({}) => {
         },
       })
       .then((result) => {
-        console.log(result.data);
+        setTableData(result.data);
       });
     changeQueryDisplay(false);
+    navigate("/table-view", { state: { name: "raeon" }, replace: true });
   };
   // dailyDataToBE is a helper function that sends the dailyData(updated by user)
   // to the back end and closes the modal
   const dailyDataToBE = () => {
-    console.log(dailyData);
+    axios.post(
+      `http://127.0.0.1:5000/daily_tracker/${
+        activeDate.toISOString().split("T")[0]
+      }`,
+      {
+        ibs: dailyData.ibs,
+        dizzy: dailyData.dizzy,
+        water: dailyData.water,
+        alcohol: dailyData.alcohol,
+        sleep: dailyData.sleep,
+        exercise: dailyData.exercise,
+        caffeine: dailyData.caffeine,
+        stress: dailyData.stress,
+        headache: dailyData.headache,
+        nausea: dailyData.nausea,
+        energy: dailyData.energy,
+        seasonal: dailyData.seasonal,
+      }
+    );
+    // Using .map to loop through food items, checking if data has been entered
+    // and if so, posting the food name to BE meal table
+    dailyData.food.map((name) => {
+      if (name !== "SelectMeal") {
+        axios.post(
+          `http://127.0.0.1:5000/meal/${
+            activeDate.toISOString().split("T")[0]
+          }`,
+          {
+            food_name: name,
+          }
+        );
+      }
+    });
     changeInputDisplay(false);
   };
-  // queryDataToBE is helper function that sends the queryOptions(updated by user)
-  // to the back end and closes the modal
-
+  // helper function on submit from newMealModal, send new meal name and ingredients to BE
+  const newMealToBE = () => {
+    axios.post("http://127.0.0.1:5000/common_food", {
+      food_name: newMealName,
+      ingredients: newMealIngredients,
+    });
+    getUserFood();
+    changeNewMealDisplay(false);
+  };
+  const changeNewMealName = (event) => {
+    updateNewMealName(event.target.value);
+  };
+  const changeNewMealIngredients = (event) => {
+    updateNewMealIngredients(event.target.value);
+  };
   return (
     <section>
       <InputData
@@ -175,6 +217,13 @@ const Dashboard = ({}) => {
         changeDailyData={updateDailyData}
         dailyDataToBE={dailyDataToBE}
         userFood={userFood}
+        newMealName={newMealName}
+        changeNewMealName={changeNewMealName}
+        newMealIngredients={newMealIngredients}
+        changeNewMealIngredients={changeNewMealIngredients}
+        newMealToBE={newMealToBE}
+        newMealDisplay={newMealDisplay}
+        changeNewMealDisplay={changeNewMealDisplay}
       ></InputData>
       <QueryDataModal
         queryIsDisplayed={queryIsDisplayed}

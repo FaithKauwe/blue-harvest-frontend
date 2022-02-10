@@ -67,11 +67,11 @@ const sample_data = {
   ],
 };
 
-const TableView = ({}) => {
+const TableView = ({ tableData }) => {
   return (
     <section>
       <h2>Migraine Symptoms</h2>
-      <MainTable sample_data={sample_data}></MainTable>
+      <MainTable sample_data={tableData}></MainTable>
     </section>
   );
 };

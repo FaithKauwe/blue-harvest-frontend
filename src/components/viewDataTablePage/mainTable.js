@@ -12,7 +12,7 @@ const MainTable = ({ sample_data }) => {
   });
   const rowsOfCells = sample_data.daily_list.map((dateDict, index) => {
     return (
-      <tr>
+      <tr key={index}>
         {Object.keys(dateDict).map((dateKey, index) => {
           return (
             <CellData

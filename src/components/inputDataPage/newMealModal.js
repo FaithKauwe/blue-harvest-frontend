@@ -1,6 +1,14 @@
 import Modal from "react-modal";
 
-const NewMealModal = ({ newMealDisplay, changeNewMealDisplay }) => {
+const NewMealModal = ({
+  newMealDisplay,
+  changeNewMealDisplay,
+  newMealName,
+  changeNewMealName,
+  newMealIngredients,
+  changeNewMealIngredients,
+  newMealToBE,
+}) => {
   Modal.setAppElement("#root");
   return (
     <section>
@@ -12,16 +20,24 @@ const NewMealModal = ({ newMealDisplay, changeNewMealDisplay }) => {
           <div className="modal-body">
             <div>
               <label>Name of New Meal</label>
-              <input type="text" name="name"></input>
+              <input
+                name="name"
+                value={newMealName}
+                onChange={changeNewMealName}
+              ></input>
             </div>
             <div>
               <label>New Meal Ingredients</label>
-              <input type="text" name="ingredients"></input>
+              <input
+                name="ingredients"
+                value={newMealIngredients}
+                onChange={changeNewMealIngredients}
+              ></input>
             </div>
           </div>
           <div className="modal-footer">
             <button onClick={() => changeNewMealDisplay(false)}>Cancel</button>
-            <button>Submit</button>
+            <button onClick={newMealToBE}>Submit</button>
           </div>
         </div>
       </Modal>
