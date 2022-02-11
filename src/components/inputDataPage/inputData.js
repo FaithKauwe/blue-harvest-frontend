@@ -40,7 +40,13 @@ const InputData = ({
         ></NewMealModal>
         <div className="modal-content">
           <div className="modal-header">
-            <h2>Date</h2>
+            <h2>
+              Data For {activeDate.getDate()}
+              {"."}
+              {activeDate.toLocaleString("default", { month: "short" })}
+              {"."}
+              {activeDate.getFullYear()}
+            </h2>
           </div>
           <div className="modal-body row">
             <FactorsContainer

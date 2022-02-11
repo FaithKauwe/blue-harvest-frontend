@@ -1,0 +1,9 @@
+.dashboard {
+    background-image: url("https://res.cloudinary.com/grohealth/image/upload/c_fill,f_auto,fl_lossy,h_650,q_auto,w_1085,x_0,y_0/v1583843120/DCUK/Content/Surprisingly-High-Carb-Food.png");
+    background-color: #cccccc;
+   }
+
+header h1 {
+    color:#f5140c;
+    font-weight: bold;
+}

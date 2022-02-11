@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "./dashboard.css";
 import InputData from "../inputDataPage/inputData";
 import QueryDataModal from "../queryDataPage/queryDataModal";
+import CalendarContainer from "../calendar/calendarContainer";
 import axios from "axios";
 
 const Dashboard = ({ tableData, setTableData }) => {
@@ -62,22 +63,33 @@ const Dashboard = ({ tableData, setTableData }) => {
   const [newMealDisplay, changeNewMealDisplay] = useState(false);
 
   // submitDate is the function which gets called when user clicks submit after input a new date
-  const submitDate = (event) => {
-    event.preventDefault();
-    // inputDate will be a string in ISO format
-    changeDate(
-      new Date(
-        inputDate.slice(0, 4),
-        inputDate.slice(5, 7) - 1,
-        inputDate.slice(8, 10)
-      )
-    );
+  // const submitDate = (event) => {
+  //   event.preventDefault();
+  //   // inputDate will be a string in ISO format
+  //   changeDate(
+  //     new Date(
+  //       inputDate.slice(0, 4),
+  //       inputDate.slice(5, 7) - 1,
+  //       inputDate.slice(8, 10)
+  //     )
+  //   );
+  // };
+  const setMonth = (event) => {
+    changeDate(new Date(activeDate.getFullYear(), event.target.cellIndex));
   };
-  const inputChange = (event) => {
-    userChangeDate(event.target.value);
-  };
+  // const inputChange = (event) => {
+  //   userChangeDate(event.target.value);
+  // };
 
   useEffect(() => {
+    getDailyDataFromBE();
+  }, [activeDate]); // each time activeDate is changed, it will call useEffect and this function is now tied to only activeDate
+
+  useEffect(() => {
+    getUserFood();
+  }, []);
+
+  const getDailyDataFromBE = () => {
     axios // the axios request uses a split function to truncuate the datetime object to this format YYYY-MM-DD
       // this axios request is tied to the BE endpoint which returns data that has already been entered for a day (NOT based on query options)
       .get(
@@ -88,10 +100,8 @@ const Dashboard = ({ tableData, setTableData }) => {
       .then((result) => {
         changeDailyData(result.data);
       });
-  }, [activeDate]); // each time activeDate is changed, it will call useEffect and this function is now tied to only activeDate
-  useEffect(() => {
-    getUserFood();
-  }, []);
+  };
+
   // getUserFood is a helper function for populateUserFood which uses an axios call to access
   // the CommonFood Table in the BE
   const getUserFood = () => {
@@ -154,39 +164,70 @@ const Dashboard = ({ tableData, setTableData }) => {
   // dailyDataToBE is a helper function that sends the dailyData(updated by user)
   // to the back end and closes the modal
   const dailyDataToBE = () => {
-    axios.post(
-      `http://127.0.0.1:5000/daily_tracker/${
-        activeDate.toISOString().split("T")[0]
-      }`,
-      {
-        ibs: dailyData.ibs,
-        dizzy: dailyData.dizzy,
-        water: dailyData.water,
-        alcohol: dailyData.alcohol,
-        sleep: dailyData.sleep,
-        exercise: dailyData.exercise,
-        caffeine: dailyData.caffeine,
-        stress: dailyData.stress,
-        headache: dailyData.headache,
-        nausea: dailyData.nausea,
-        energy: dailyData.energy,
-        seasonal: dailyData.seasonal,
-      }
-    );
-    // Using .map to loop through food items, checking if data has been entered
-    // and if so, posting the food name to BE meal table
-    dailyData.food.map((name) => {
-      if (name !== "SelectMeal") {
-        axios.post(
-          `http://127.0.0.1:5000/meal/${
-            activeDate.toISOString().split("T")[0]
-          }`,
-          {
+    if (dailyData.exists === true) {
+      axios.put(
+        `http://127.0.0.1:5000/daily_tracker/${
+          activeDate.toISOString().split("T")[0]
+        }`,
+        {
+          id: dailyData.id,
+          ibs: dailyData.ibs,
+          dizzy: dailyData.dizzy,
+          water: dailyData.water,
+          alcohol: dailyData.alcohol,
+          sleep: dailyData.sleep,
+          exercise: dailyData.exercise,
+          caffeine: dailyData.caffeine,
+          stress: dailyData.stress,
+          headache: dailyData.headache,
+          nausea: dailyData.nausea,
+          energy: dailyData.energy,
+          seasonal: dailyData.seasonal,
+        }
+      );
+      dailyData.food.map((name, index) => {
+        if (name !== "SelectMeal") {
+          axios.put(`http://127.0.0.1:5000/meal/${dailyData.id}`, {
             food_name: name,
-          }
-        );
-      }
-    });
+            id: index,
+          });
+        }
+      });
+    } else {
+      axios.post(
+        `http://127.0.0.1:5000/daily_tracker/${
+          activeDate.toISOString().split("T")[0]
+        }`,
+        {
+          ibs: dailyData.ibs,
+          dizzy: dailyData.dizzy,
+          water: dailyData.water,
+          alcohol: dailyData.alcohol,
+          sleep: dailyData.sleep,
+          exercise: dailyData.exercise,
+          caffeine: dailyData.caffeine,
+          stress: dailyData.stress,
+          headache: dailyData.headache,
+          nausea: dailyData.nausea,
+          energy: dailyData.energy,
+          seasonal: dailyData.seasonal,
+        }
+      );
+      // Using .map to loop through food items, checking if data has been entered
+      // and if so, posting the food name to BE meal table
+      dailyData.food.map((name) => {
+        if (name !== "SelectMeal") {
+          axios.post(
+            `http://127.0.0.1:5000/meal/${
+              activeDate.toISOString().split("T")[0]
+            }`,
+            {
+              food_name: name,
+            }
+          );
+        }
+      });
+    }
     changeInputDisplay(false);
   };
   // helper function on submit from newMealModal, send new meal name and ingredients to BE
@@ -205,7 +246,44 @@ const Dashboard = ({ tableData, setTableData }) => {
     updateNewMealIngredients(event.target.value);
   };
   return (
-    <section>
+    <section className="dashboard">
+      <header className="container-fluid">
+        <h1 className="row justify-content-center my-3">
+          Welcome to <br />
+          Blue Harvest
+        </h1>
+      </header>
+      <nav className="nav justify-content-center ">
+        {/* onClick is the action being listened for, changeInputDisplay is the 
+            function I want performed when the click is registered */}
+        {/* changeInputDisplay has to be wrapped in () and
+            anonymous function or it will get called every time the page renders*/}
+        <div className="nav-item">
+          <button className="nav-link" onClick={() => changeInputDisplay(true)}>
+            Input Data
+          </button>
+        </div>
+        <div className="nav-item">
+          <button className="nav-link" onClick={() => changeQueryDisplay(true)}>
+            Query Data
+          </button>
+        </div>
+        {/* <form onSubmit={submitDate}>
+          <label>Change Date</label>
+          <input value={inputDate} onChange={inputChange}></input>
+          <button type="submit">Submit</button>
+        </form> */}
+      </nav>
+
+      <CalendarContainer
+        activeDate={activeDate}
+        setActiveDate={changeDate}
+        setMonth={setMonth}
+        dailyData={dailyData}
+      ></CalendarContainer>
+
+      {/*    MODALS (x2) START HERE    */}
+
       <InputData
         // assigning the props. left side of = is what the state or function is called in InputData
         // right side of = is what the state/function is called in Dashboard, in this case, both use the same name
@@ -232,17 +310,6 @@ const Dashboard = ({ tableData, setTableData }) => {
         changeQueryOptions={updateQueryOptions}
         queryDataToBE={queryDataToBE}
       ></QueryDataModal>
-      {/* onClick is the action being listened for, changeInputDisplay is the 
-      function I want performed when the click is registered */}
-      {/* changeInputDisplay has to be wrapped in () and
-          anonymous function or it will get called every time the page renders*/}
-      <button onClick={() => changeInputDisplay(true)}>Input Data</button>
-      <button onClick={() => changeQueryDisplay(true)}>Query Data</button>
-      <form onSubmit={submitDate}>
-        <label>Change Date</label>
-        <input value={inputDate} onChange={inputChange}></input>
-        <button type="submit">Submit</button>
-      </form>
     </section>
   );
 };

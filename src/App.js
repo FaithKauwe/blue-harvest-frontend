@@ -71,25 +71,23 @@ function App() {
   const [tableData, setTableData] = useState(sample_data);
 
   return (
-    <section>
-      <BrowserRouter>
-        <Routes>
-          <Route
-            path="/"
-            element={
-              <Dashboard
-                tableData={tableData}
-                setTableData={setTableData}
-              ></Dashboard>
-            }
-          ></Route>
-          <Route
-            path="/table-view"
-            element={<TableView tableData={tableData}></TableView>}
-          ></Route>
-        </Routes>
-      </BrowserRouter>
-    </section>
+    <BrowserRouter>
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <Dashboard
+              tableData={tableData}
+              setTableData={setTableData}
+            ></Dashboard>
+          }
+        ></Route>
+        <Route
+          path="/table-view"
+          element={<TableView tableData={tableData}></TableView>}
+        ></Route>
+      </Routes>
+    </BrowserRouter>
   );
 }
 

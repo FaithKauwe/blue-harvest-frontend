@@ -3,14 +3,14 @@ import "./mainTable.css";
 import HeaderItem from "./headerItem";
 import CellData from "./cellData";
 
-const MainTable = ({ sample_data }) => {
+const MainTable = ({ tableData }) => {
   // headers is a variable which will store the results of the map function, a list of headerItem components
   // with each component having a different header name
-  // Object.keys returns a list of keys fr sample_data object, and map() needs a list
-  const headers = Object.keys(sample_data.daily_list[0]).map((key, index) => {
+  // Object.keys returns a list of keys fr tableData object, and map() needs a list
+  const headers = Object.keys(tableData.daily_list[0]).map((key, index) => {
     return <HeaderItem key={index} headerName={key} index={index}></HeaderItem>;
   });
-  const rowsOfCells = sample_data.daily_list.map((dateDict, index) => {
+  const rowsOfCells = tableData.daily_list.map((dateDict, index) => {
     return (
       <tr key={index}>
         {Object.keys(dateDict).map((dateKey, index) => {
