@@ -6,7 +6,10 @@ import QueryDataModal from "../queryDataPage/queryDataModal";
 import CalendarContainer from "../calendar/calendarContainer";
 import axios from "axios";
 
-const Dashboard = ({ tableData, setTableData }) => {
+const Dashboard = ({ setTableData }) => {
+  // const backEndURL = "http://localhost:5000";
+  const backEndURL = "https://blue-harvest-backend.herokuapp.com";
+
   // blankData is the initital state for dailyData and changeDailyData
   const blankData = {
     food: [
@@ -29,6 +32,7 @@ const Dashboard = ({ tableData, setTableData }) => {
     dizzy: "",
     energy: "",
     seasonal: "",
+    exists: "",
   };
   // setting the intial state for queryOptions, as a dict
   const blankQueryOptions = {
@@ -53,49 +57,31 @@ const Dashboard = ({ tableData, setTableData }) => {
   // this state holds all 18 data entries for inputData, starts as an empty dict
   const [dailyData, changeDailyData] = useState(blankData);
   const [userFood, populateUserFood] = useState();
-
-  const [inputDate, userChangeDate] = useState(
-    activeDate.toISOString().split("T")[0]
-  );
   // these two states track the input boxes in newMealModal as a user enters new meal name and ingredients
   const [newMealName, updateNewMealName] = useState("");
   const [newMealIngredients, updateNewMealIngredients] = useState("");
+  //This tracks the display (Y/N) of the new meal modal
   const [newMealDisplay, changeNewMealDisplay] = useState(false);
-
-  // submitDate is the function which gets called when user clicks submit after input a new date
-  // const submitDate = (event) => {
-  //   event.preventDefault();
-  //   // inputDate will be a string in ISO format
-  //   changeDate(
-  //     new Date(
-  //       inputDate.slice(0, 4),
-  //       inputDate.slice(5, 7) - 1,
-  //       inputDate.slice(8, 10)
-  //     )
-  //   );
-  // };
-  const setMonth = (event) => {
-    changeDate(new Date(activeDate.getFullYear(), event.target.cellIndex));
-  };
-  // const inputChange = (event) => {
-  //   userChangeDate(event.target.value);
-  // };
 
   useEffect(() => {
     getDailyDataFromBE();
   }, [activeDate]); // each time activeDate is changed, it will call useEffect and this function is now tied to only activeDate
 
+  // On page load, get the list of common_food names and ingredients
   useEffect(() => {
     getUserFood();
   }, []);
+
+  // When the month name is clicked on the calendar, change activeDate to first day of that month
+  const setMonth = (event) => {
+    changeDate(new Date(activeDate.getFullYear(), event.target.cellIndex));
+  };
 
   const getDailyDataFromBE = () => {
     axios // the axios request uses a split function to truncuate the datetime object to this format YYYY-MM-DD
       // this axios request is tied to the BE endpoint which returns data that has already been entered for a day (NOT based on query options)
       .get(
-        `http://127.0.0.1:5000/daily_tracker/${
-          activeDate.toISOString().split("T")[0]
-        }`
+        `${backEndURL}/daily_tracker/${activeDate.toISOString().split("T")[0]}`
       )
       .then((result) => {
         changeDailyData(result.data);
@@ -105,10 +91,11 @@ const Dashboard = ({ tableData, setTableData }) => {
   // getUserFood is a helper function for populateUserFood which uses an axios call to access
   // the CommonFood Table in the BE
   const getUserFood = () => {
-    axios.get(`http://127.0.0.1:5000/common_food`).then((result) => {
+    axios.get(`${backEndURL}/common_food`).then((result) => {
       populateUserFood(result.data);
     });
   };
+
   // updateDailyData is a helper function for changeDailyData
   const updateDailyData = (event, index) => {
     // create deep copy of dailyData
@@ -123,6 +110,7 @@ const Dashboard = ({ tableData, setTableData }) => {
     // has the user's selections
     changeDailyData(tempData);
   };
+
   const [queryOptions, changeQueryOptions] = useState(blankQueryOptions);
   // updateQueryOptions is a helper function for changeQueryOptions, that
   // will change the state of queryOptions based on what updateQueryOptions
@@ -142,10 +130,9 @@ const Dashboard = ({ tableData, setTableData }) => {
   };
   // queryDataToBE is helper function that sends the queryOptions(selected by user)
   // to the back end and closes the modal
-
   const queryDataToBE = () => {
     axios
-      .get(`http://127.0.0.1:5000/daily_tracker`, {
+      .get(`${backEndURL}/daily_tracker`, {
         params: {
           symptom: queryOptions.symptom,
           severity: queryOptions.severity,
@@ -161,14 +148,35 @@ const Dashboard = ({ tableData, setTableData }) => {
     changeQueryDisplay(false);
     navigate("/table-view", { state: { name: "raeon" }, replace: true });
   };
+
+  const postNewMeals = () => {
+    // Using .map to loop through food items, checking if data has been entered
+    // and if so, posting the food name to BE meal table
+    dailyData.food.map((name) => {
+      if (name !== "SelectMeal") {
+        axios
+          .post(
+            `${backEndURL}/meal/${activeDate.toISOString().split("T")[0]}`,
+            {
+              food_name: name,
+            }
+          )
+          .then((result) => {
+            getDailyDataFromBE();
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      }
+    });
+  };
+
   // dailyDataToBE is a helper function that sends the dailyData(updated by user)
   // to the back end and closes the modal
   const dailyDataToBE = () => {
     if (dailyData.exists === true) {
       axios.put(
-        `http://127.0.0.1:5000/daily_tracker/${
-          activeDate.toISOString().split("T")[0]
-        }`,
+        `${backEndURL}/daily_tracker/${activeDate.toISOString().split("T")[0]}`,
         {
           id: dailyData.id,
           ibs: dailyData.ibs,
@@ -187,56 +195,58 @@ const Dashboard = ({ tableData, setTableData }) => {
       );
       dailyData.food.map((name, index) => {
         if (name !== "SelectMeal") {
-          axios.put(`http://127.0.0.1:5000/meal/${dailyData.id}`, {
-            food_name: name,
-            id: index,
-          });
-        }
-      });
-    } else {
-      axios.post(
-        `http://127.0.0.1:5000/daily_tracker/${
-          activeDate.toISOString().split("T")[0]
-        }`,
-        {
-          ibs: dailyData.ibs,
-          dizzy: dailyData.dizzy,
-          water: dailyData.water,
-          alcohol: dailyData.alcohol,
-          sleep: dailyData.sleep,
-          exercise: dailyData.exercise,
-          caffeine: dailyData.caffeine,
-          stress: dailyData.stress,
-          headache: dailyData.headache,
-          nausea: dailyData.nausea,
-          energy: dailyData.energy,
-          seasonal: dailyData.seasonal,
-        }
-      );
-      // Using .map to loop through food items, checking if data has been entered
-      // and if so, posting the food name to BE meal table
-      dailyData.food.map((name) => {
-        if (name !== "SelectMeal") {
-          axios.post(
-            `http://127.0.0.1:5000/meal/${
-              activeDate.toISOString().split("T")[0]
-            }`,
+          axios.put(
+            `${backEndURL}/meal/${activeDate.toISOString().split("T")[0]}`,
             {
               food_name: name,
+              id: index,
             }
           );
         }
       });
+    } else {
+      axios
+        .post(
+          `${backEndURL}/daily_tracker/${
+            activeDate.toISOString().split("T")[0]
+          }`,
+          {
+            ibs: dailyData.ibs,
+            dizzy: dailyData.dizzy,
+            water: dailyData.water,
+            alcohol: dailyData.alcohol,
+            sleep: dailyData.sleep,
+            exercise: dailyData.exercise,
+            caffeine: dailyData.caffeine,
+            stress: dailyData.stress,
+            headache: dailyData.headache,
+            nausea: dailyData.nausea,
+            energy: dailyData.energy,
+            seasonal: dailyData.seasonal,
+          }
+        )
+        .then((result) => {
+          console.log(result);
+          postNewMeals();
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     }
     changeInputDisplay(false);
   };
+
   // helper function on submit from newMealModal, send new meal name and ingredients to BE
   const newMealToBE = () => {
-    axios.post("http://127.0.0.1:5000/common_food", {
-      food_name: newMealName,
-      ingredients: newMealIngredients,
-    });
-    getUserFood();
+    axios
+      .post(`${backEndURL}/common_food`, {
+        food_name: newMealName,
+        ingredients: newMealIngredients,
+      })
+      .then((result) => {
+        getUserFood();
+      });
+
     changeNewMealDisplay(false);
   };
   const changeNewMealName = (event) => {
@@ -245,6 +255,7 @@ const Dashboard = ({ tableData, setTableData }) => {
   const changeNewMealIngredients = (event) => {
     updateNewMealIngredients(event.target.value);
   };
+
   return (
     <section className="dashboard">
       <header className="container-fluid">
@@ -268,11 +279,6 @@ const Dashboard = ({ tableData, setTableData }) => {
             Query Data
           </button>
         </div>
-        {/* <form onSubmit={submitDate}>
-          <label>Change Date</label>
-          <input value={inputDate} onChange={inputChange}></input>
-          <button type="submit">Submit</button>
-        </form> */}
       </nav>
 
       <CalendarContainer

@@ -8,9 +8,28 @@ const CalendarContainer = ({
   dailyData,
 }) => {
   const toDisplay = (
-    <div>
-      <p>DataExists</p>
-    </div>
+    <section>
+      <div className="row">
+        <p>
+          <u>Daily Data:</u>
+        </p>
+      </div>
+      <div className="row">
+        <p>Sleep: {dailyData.sleep}</p>
+      </div>
+      <div className="row">
+        <p>Exercise: {dailyData.exercise}</p>
+      </div>
+      <div className="row">
+        <p>Caffeine: {dailyData.caffeine}</p>
+      </div>
+      <div className="row">
+        <p>Alcohol: {dailyData.alcohol}</p>
+      </div>
+      <div className="row">
+        <p>Water: {dailyData.water}</p>
+      </div>
+    </section>
   );
   const notToDisplay = (
     <div>
@@ -31,7 +50,7 @@ const CalendarContainer = ({
               ></Calendar>
               <div className="meals-container">
                 {/* This is the side bar that contains food entries for activeDate */}
-                <h2>
+                <h2 className="mb-5">
                   {activeDate.getDate()}
                   {"."}
                   {activeDate.toLocaleString("default", { month: "short" })}
