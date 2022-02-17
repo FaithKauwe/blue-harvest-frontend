@@ -10,6 +10,9 @@ To Visit App: localhost:3000
 This was a 3 week long project built for my capstone project at Ada Developers’ Academy.  Project goals included building a desktop app from the ground up, using a full stack of learned and newer technologies. I chose to use React, Javascript, html and css for the front end. I started this process by using the create-react-app boilerplate, then adding react-router-dom
 When the FE server (npm start) is started and BE server is started (flask run), the FE will show a main Dashboard/ home page where there are various calendar days to click and input/ view/ query data
 
+The local server version of this repo works very well, with no found bugs.  The heroku deployed version seems to have some random bugs, research suggests this may be because heroku doesn't deploy well with mySQL, but this option is available.  If user would like to switch from local server to deployed version, simply switch between commented out lines in dashboard.js which is found src>>components>>mainDashboard>>dashboard.js
+the lines in question are lines 11 and 12 of this file which will change the backend connection
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

@@ -7,8 +7,8 @@ import CalendarContainer from "../calendar/calendarContainer";
 import axios from "axios";
 
 const Dashboard = ({ setTableData }) => {
-  const backEndURL = "http://localhost:5000";
-  // const backEndURL = "https://blue-harvest-backend.herokuapp.com";
+  //const backEndURL = "http://localhost:5000";
+  const backEndURL = "https://blue-harvest-backend.herokuapp.com";
 
   // blankData is the initital state for dailyData and changeDailyData
   const blankData = {
