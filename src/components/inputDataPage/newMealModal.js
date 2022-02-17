@@ -22,6 +22,7 @@ const NewMealModal = ({
               <label>Name of New Meal</label>
               <input
                 name="name"
+                maxLength="15"
                 value={newMealName}
                 onChange={changeNewMealName}
               ></input>

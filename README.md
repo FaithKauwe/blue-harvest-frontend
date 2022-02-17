@@ -1,3 +1,15 @@
+ReadMe for Blue-Harvest-FrontEnd
+
+Blue-Harvest
+An application to help a user log, track and query data about food + drink a user is consuming and daily health habits to help the user identify any factors that may trigger various symptoms. 
+
+Installation + Setup Instructions
+Clone down this repository. You will need node and npm installed globally on your machine.
+To Start Server: npm start
+To Visit App: localhost:3000
+This was a 3 week long project built for my capstone project at Ada Developers’ Academy.  Project goals included building a desktop app from the ground up, using a full stack of learned and newer technologies. I chose to use React, Javascript, html and css for the front end. I started this process by using the create-react-app boilerplate, then adding react-router-dom
+When the FE server (npm start) is started and BE server is started (flask run), the FE will show a main Dashboard/ home page where there are various calendar days to click and input/ view/ query data
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
